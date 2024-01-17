@@ -49,6 +49,9 @@
         ],
         "fix-styles": [
             "./vendor/bin/pint"
+        ],
+        "analyse": [
+            "./vendor/bin/phpstan analyse"
         ]
     },
     "extra": {
