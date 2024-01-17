@@ -53,6 +53,9 @@
         ],
         "analyse": [
             "./vendor/bin/phpstan analyse"
+        ],
+        "ide-helper": [
+            "@php artisan ide-helper:models -W"
         ]
     },
     "extra": {
