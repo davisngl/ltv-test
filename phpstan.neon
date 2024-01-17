@@ -1,0 +1,9 @@
+parameters:
+    paths:
+        - app/
+    level: 7
+
+    # Cases with too much voodoo to handle for this project
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        - '#Call to an undefined method Illuminate\\Support\\HigherOrder#'
