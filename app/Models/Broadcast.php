@@ -20,6 +20,7 @@ class Broadcast extends Model
     {
         return $this
             ->belongsToMany(Channel::class)
+            ->as('airing')
             ->withPivot([
                 'starts_at',
                 'ends_at',
