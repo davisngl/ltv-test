@@ -18,17 +18,17 @@ class GuideController extends Controller
 
     public function composeGuide(ComposeGuideRequest $request)
     {
+        $airing = new BroadcastAiring(
+            broadcastName: $request->input('broadcast_name'),
+            datetime: new CarbonPeriod(
+                $request->input('starts_at'),
+                $request->input('ends_at')
+            )
+        );
+
         $request
             ->getChannel()
-            ->addBroadcast(
-                new BroadcastAiring(
-                    broadcastName: $request->input('broadcast_name'),
-                    datetime: new CarbonPeriod(
-                        $request->input('starts_at'),
-                        $request->input('ends_at')
-                    )
-                )
-            );
+            ->addBroadcast($airing);
 
         return response()->success(
             message: 'Broadcast airing successfully added',
