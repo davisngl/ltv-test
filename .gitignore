@@ -19,4 +19,5 @@ yarn-error.log
 /.vscode
 
 # IDE helper related
-_ide_helper_*
+_ide_helper*
+.phpstorm.meta.php

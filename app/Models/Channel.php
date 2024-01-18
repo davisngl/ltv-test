@@ -3,11 +3,15 @@
 namespace App\Models;
 
 use App\Contracts\BroadcastAiringInterface;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 
+/**
+ * @mixin IdeHelperChannel
+ */
 class Channel extends Model
 {
     use HasFactory;
@@ -28,6 +32,21 @@ class Channel extends Model
                 'starts_at',
                 'ends_at',
             ]);
+    }
+
+    public function airingsOn(CarbonImmutable $date): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Broadcast::class)
+            ->as('airing')
+            ->withPivot([
+                'starts_at',
+                'ends_at',
+            ])
+            ->wherePivotBetween(
+                'starts_at',
+                [$date->setTime(hour: 6, minute: 0), $date->addDay()]
+            );
     }
 
     public function addBroadcast(BroadcastAiringInterface $airing): Broadcast
