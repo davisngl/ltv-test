@@ -24,8 +24,8 @@ return new class extends Migration {
             $table->foreignIdFor(Channel::class)
                 ->constrained()
                 ->cascadeOnDelete();
-            $table->timestamp('starts_at')->nullable();
-            $table->timestamp('ends_at')->nullable();
+            $table->timestamp('starts_at');
+            $table->timestamp('ends_at');
         });
     }
 };

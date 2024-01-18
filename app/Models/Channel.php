@@ -37,8 +37,8 @@ class Channel extends Model
         $this->broadcasts()->attach(
             $broadcast,
             [
-                'starts_at' => $airing->getAiringDatetime()?->getStartDate(),
-                'ends_at'   => $airing->getAiringDatetime()?->getEndDate(),
+                'starts_at' => $airing->getAiringDatetime()->getStartDate(),
+                'ends_at'   => $airing->getAiringDatetime()->getEndDate(),
             ]
         );
 

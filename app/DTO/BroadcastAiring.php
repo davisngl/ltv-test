@@ -17,7 +17,7 @@ readonly class BroadcastAiring implements BroadcastAiringInterface
         return $this->broadcastName;
     }
 
-    public function getAiringDatetime(): ?CarbonPeriod
+    public function getAiringDatetime(): CarbonPeriod
     {
         return $this->datetime;
     }

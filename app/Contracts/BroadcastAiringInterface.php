@@ -9,7 +9,7 @@ interface BroadcastAiringInterface
     public function getBroadcastName(): string;
 
     /**
-     * @return CarbonPeriod|null Broadcasts' start time and end time if it's given
+     * @return CarbonPeriod Broadcasts' start time and end time if it's given
      */
-    public function getAiringDatetime(): ?CarbonPeriod;
+    public function getAiringDatetime(): CarbonPeriod;
 }
