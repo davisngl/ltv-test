@@ -20,7 +20,7 @@ class ChannelFactory extends Factory
     {
         return [
             'number' => random_int(1, 3),
-            'name'   => $this->faker->company(),
+            'name'   => $this->faker->name(),
         ];
     }
 }

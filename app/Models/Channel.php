@@ -23,6 +23,7 @@ class Channel extends Model
     {
         return $this
             ->belongsToMany(Broadcast::class)
+            ->as('airing')
             ->withPivot([
                 'starts_at',
                 'ends_at',
@@ -41,6 +42,6 @@ class Channel extends Model
             ]
         );
 
-        return $broadcast;
+        return $this->broadcasts()->find($broadcast->id);
     }
 }
