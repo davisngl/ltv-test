@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\DTO\BroadcastAiring;
 use App\Exceptions\DateFilterException;
 use App\Http\Requests\ComposeGuideRequest;
+use App\Models\Broadcast;
 use App\Models\Channel;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonPeriod;
@@ -20,7 +21,28 @@ class GuideController extends Controller
             throw DateFilterException::incorrectDateFormatSupplied();
         }
 
-        return response()->success(data: $channel->airingsOn($date)->get());
+        $airings = $channel
+            ->airingsOn($date)
+            ->get(['name', 'starts_at', 'ends_at'])
+            ->values();
+
+        $airings
+            ->map(function (Broadcast $broadcast, int $order) use (&$airings) {
+                $nextBroadcast = $airings->get($order + 1);
+                // Pivot values are dragged along the related model,
+                // for cleaner output, we remove it.
+                unset($broadcast->airing);
+
+                if (! $nextBroadcast) {
+                    return $broadcast->toArray();
+                }
+
+                $broadcast->ends_at = $nextBroadcast->starts_at;
+
+                return $broadcast->toArray();
+            });
+
+        return response()->success(data: $airings);
     }
 
     public function composeGuide(ComposeGuideRequest $request)

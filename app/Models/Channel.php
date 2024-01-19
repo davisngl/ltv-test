@@ -46,7 +46,8 @@ class Channel extends Model
             ->wherePivotBetween(
                 'starts_at',
                 [$date->setTime(hour: 6, minute: 0), $date->addDay()]
-            );
+            )
+            ->orderByPivot('starts_at');
     }
 
     public function addBroadcast(BroadcastAiringInterface $airing): Broadcast
