@@ -36,17 +36,19 @@ class Channel extends Model
 
     public function airingsOn(CarbonImmutable $date): BelongsToMany
     {
+        $fromDatetime = $date->setTime(hour: 6, minute: 0);
+        $endDatetime = $fromDatetime->addDay();
+
         return $this
             ->belongsToMany(Broadcast::class)
             ->as('airing')
-            ->withPivot([
-                'starts_at',
-                'ends_at',
-            ])
-            ->wherePivotBetween(
-                'starts_at',
-                [$date->setTime(hour: 6, minute: 0), $date->addDay()]
-            )
+            ->withPivot(['starts_at', 'ends_at'])
+            /**
+             * Date filtering works with inclusive 'from' and exclusive 'end' dates,
+             * as 06:00:00 already denotes next days' TV program.
+             */
+            ->wherePivot('starts_at', '>=', $fromDatetime)
+            ->wherePivot('ends_at', '<', $endDatetime)
             ->orderByPivot('starts_at');
     }
 
