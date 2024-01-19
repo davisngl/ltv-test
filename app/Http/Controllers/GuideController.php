@@ -64,4 +64,23 @@ class GuideController extends Controller
             status: Response::HTTP_CREATED
         );
     }
+
+    public function currentBroadcast(Channel $channel)
+    {
+        $currentlyOnAir = $channel->currentlyAiring();
+
+        if (! $currentlyOnAir) {
+            return response()->failure(
+                message: 'Nothing on air currently. Is the TV guide set for the day?',
+                status: 404
+            );
+        }
+
+        return response()->success(data: $currentlyOnAir->toArray());
+    }
+
+    public function upcomingBroadcasts(Channel $channel)
+    {
+        return response()->json(data: $channel->upcomingBroadcasts());
+    }
 }
