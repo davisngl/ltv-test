@@ -28,21 +28,20 @@ class AppServiceProvider extends ServiceProvider
         );
 
         // API response macros
-        Response::macro('success', function (string $message = 'Success', Collection|array $data = [], int $status = ResponseCode::HTTP_OK) {
+        Response::macro('success', function (string $message = 'Success', mixed $data = [], int $status = ResponseCode::HTTP_OK) {
             return Response::json([
                 'success' => true,
                 'message' => $message,
-                'data'    => count($data) ? $data : null,
+                'data'    => $data,
             ], $status);
         });
 
-        Response::macro('failure', function (string $message = 'Failure', Collection|array $data = [], int $status = ResponseCode::HTTP_UNPROCESSABLE_ENTITY) {
-            $data = $data instanceof Collection ? $data->toArray() : $data;
-
+        Response::macro('failure', function (string $message = 'Failure', mixed $data = [], int $status = ResponseCode::HTTP_UNPROCESSABLE_ENTITY) {
+            // TODO Create reusable DTO that can be passed here, as it's kinda needed in API resources as well.
             return Response::json([
                 'success' => false,
                 'message' => $message,
-                'data'    => count($data) ? $data : null,
+                'data'    => $data,
             ], $status);
         });
     }

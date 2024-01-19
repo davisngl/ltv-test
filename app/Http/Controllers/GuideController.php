@@ -5,25 +5,28 @@ namespace App\Http\Controllers;
 use App\DTO\BroadcastAiring;
 use App\Exceptions\DateFilterException;
 use App\Http\Requests\ComposeGuideRequest;
+use App\Http\Resources\BroadcastResource;
+use App\Http\Resources\BroadcastResourceCollection;
 use App\Models\Broadcast;
 use App\Models\Channel;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonPeriod;
+use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\Response;
 
 class GuideController extends Controller
 {
     public function guideForDay(Channel $channel, string $date)
     {
-        $date = CarbonImmutable::createFromFormat('Y-m-d', $date);
-
-        if (! $date) {
+        try {
+            $date = CarbonImmutable::createFromFormat('Y-m-d', $date);
+        } catch (InvalidFormatException) {
             throw DateFilterException::incorrectDateFormatSupplied();
         }
 
         $airings = $channel
             ->airingsOn($date)
-            ->get(['name', 'starts_at', 'ends_at'])
+            ->get()
             ->values();
 
         $airings
@@ -42,7 +45,7 @@ class GuideController extends Controller
                 return $broadcast->toArray();
             });
 
-        return response()->success(data: $airings);
+        return BroadcastResourceCollection::make($airings);
     }
 
     public function composeGuide(ComposeGuideRequest $request)
@@ -76,11 +79,13 @@ class GuideController extends Controller
             );
         }
 
-        return response()->success(data: $currentlyOnAir->toArray());
+        return response()->success(
+            data: BroadcastResource::make($currentlyOnAir)
+        );
     }
 
     public function upcomingBroadcasts(Channel $channel)
     {
-        return response()->json(data: $channel->upcomingBroadcasts());
+        return BroadcastResourceCollection::make($channel->upcomingBroadcasts());
     }
 }

@@ -18,6 +18,7 @@ return new class extends Migration {
         });
 
         Schema::create('broadcast_channel', function (Blueprint $table) {
+            $table->id();
             $table->foreignIdFor(Broadcast::class)
                 ->constrained()
                 ->cascadeOnDelete();

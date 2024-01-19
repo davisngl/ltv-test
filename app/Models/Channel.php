@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-
 /**
  * @mixin IdeHelperChannel
  */
@@ -28,11 +27,7 @@ class Channel extends Model
     {
         return $this
             ->belongsToMany(Broadcast::class)
-            ->as('airing')
-            ->withPivot([
-                'starts_at',
-                'ends_at',
-            ]);
+            ->as('airing');
     }
 
     public function airingsOn(CarbonImmutable $date): BelongsToMany
@@ -41,8 +36,7 @@ class Channel extends Model
         $endDatetime = $fromDatetime->addDay();
 
         return $this
-            ->belongsToMany(Broadcast::class)
-            ->withPivot(['starts_at', 'ends_at'])
+            ->broadcasts()
             /**
              * Date filtering works with inclusive 'from' and exclusive 'end' dates,
              * as 06:00:00 already denotes next days' TV program.
