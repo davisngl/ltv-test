@@ -27,6 +27,7 @@ class Channel extends Model
     {
         return $this
             ->belongsToMany(Broadcast::class)
+            ->withPivot(['starts_at', 'ends_at'])
             ->as('airing');
     }
 

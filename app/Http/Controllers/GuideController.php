@@ -32,15 +32,12 @@ class GuideController extends Controller
         $airings
             ->map(function (Broadcast $broadcast, int $order) use (&$airings) {
                 $nextBroadcast = $airings->get($order + 1);
-                // Pivot values are dragged along the related model,
-                // for cleaner output, we remove it.
-                unset($broadcast->airing);
 
                 if (! $nextBroadcast) {
                     return $broadcast->toArray();
                 }
 
-                $broadcast->ends_at = $nextBroadcast->starts_at;
+                $broadcast->airing->ends_at = $nextBroadcast->airing->starts_at;
 
                 return $broadcast->toArray();
             });

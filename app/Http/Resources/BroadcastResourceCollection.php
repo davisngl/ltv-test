@@ -11,7 +11,7 @@ class BroadcastResourceCollection extends ResourceCollection
     {
         return [
             'success' => true,
-            'message' => 'Success',
+            'message' => 'Guide for the day retrieved successfully',
             'data'    => $this->collection,
         ];
     }

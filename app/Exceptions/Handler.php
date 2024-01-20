@@ -31,7 +31,7 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $e) {
-            if (app()->runningUnitTests() || ! request()->wantsJson()) {
+            if (app()->runningUnitTests()) {
                 // In tests, some assertions require the "original" structure of certain exceptions,
                 // therefore, we only would overwrite the structure during normal operation.
                 return;
@@ -46,6 +46,10 @@ class Handler extends ExceptionHandler
 
     protected function invalidJson($request, ValidationException $exception): JsonResponse
     {
+        if (app()->runningUnitTests()) {
+            return parent::invalidJson($request, $exception);
+        }
+
         return response()->failure(
             message: $exception->getMessage(),
             data: count($exception->errors())
