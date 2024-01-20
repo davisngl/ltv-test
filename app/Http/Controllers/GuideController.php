@@ -59,7 +59,7 @@ class GuideController extends Controller
             ->addBroadcast($airing);
 
         return response()->success(
-            message: 'Broadcast airing successfully added',
+            message: 'Broadcast airing added successfully',
             status: Response::HTTP_CREATED
         );
     }
@@ -76,6 +76,7 @@ class GuideController extends Controller
         }
 
         return response()->success(
+            message: 'Current broadcast retrieved successfully',
             data: BroadcastResource::make($currentlyOnAir)
         );
     }
