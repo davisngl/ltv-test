@@ -9,6 +9,7 @@ use Exception;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Collection;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Period\Period;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -33,7 +34,7 @@ abstract class TestCase extends BaseTestCase
             $payload->push(
                 new BroadcastAiring(
                     sprintf('Broadcast #%d', $iteration),
-                    new CarbonPeriod($now, $now->addMinutes(30))
+                    Period::make(start: $now, end: $now->addMinutes(30))
                 )
             );
 

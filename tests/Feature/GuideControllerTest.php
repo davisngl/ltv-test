@@ -5,12 +5,12 @@ namespace Tests\Feature;
 use App\DTO\BroadcastAiring;
 use App\Exceptions\DateFilterException;
 use App\Models\Channel;
-use Carbon\CarbonPeriod;
 use Closure;
 use Generator;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Fluent;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Spatie\Period\Period;
 use Tests\TestCase;
 
 class GuideControllerTest extends TestCase
@@ -38,15 +38,15 @@ class GuideControllerTest extends TestCase
         ];
 
         yield from [
-            'missing channel_number' => [
+            'missing channel_number'                     => [
                 'payload' => array_merge($payload, ['channel_number' => null]),
                 'keys'    => ['channel_number'],
             ],
-            'channel number does not exist' => [
+            'channel number does not exist'              => [
                 'payload' => array_merge($payload, ['channel_number' => 20]),
                 'keys'    => ['channel_number'],
             ],
-            'broadcast_name too long' => [
+            'broadcast_name too long'                    => [
                 'payload' => array_merge($payload, ['broadcast_name' => str('s')->repeat(101)]),
                 'keys'    => ['broadcast_name'],
             ],
@@ -54,15 +54,15 @@ class GuideControllerTest extends TestCase
                 'payload' => array_merge($payload, ['ends_at' => $payload['starts_at']->subDay()]),
                 'keys'    => ['ends_at'],
             ],
-            'airing at given time already exists' => [
+            'airing at given time already exists'        => [
                 'payload' => $payload,
                 'keys'    => ['starts_at', 'ends_at'],
                 'setup'   => static function () use ($payload) {
                     $airingPayload = new BroadcastAiring(
                         'Broadcast Test',
-                        new CarbonPeriod(
-                            $payload['starts_at'],
-                            $payload['starts_at']->addMinutes(30)
+                        Period::make(
+                            start: $payload['starts_at'],
+                            end: $payload['starts_at']->addMinutes(30)
                         )
                     );
 
@@ -89,7 +89,7 @@ class GuideControllerTest extends TestCase
         $this
             ->withoutExceptionHandling()
             ->assertThrows(
-                fn () => $this->getJson(route('guide-for-day', ['channel' => $channel, 'date' => ':invalid:'])),
+                fn() => $this->getJson(route('guide-for-day', ['channel' => $channel, 'date' => ':invalid:'])),
                 DateFilterException::class
             );
     }
@@ -100,7 +100,7 @@ class GuideControllerTest extends TestCase
         $channel = Channel::factory()->create();
 
         $this->makeAirings($amountOfAirings = 10)->map(
-            fn (BroadcastAiring $airing) => $channel->addBroadcast($airing)
+            fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
         );
 
         $this
@@ -111,7 +111,7 @@ class GuideControllerTest extends TestCase
                 )
             )
             ->assertOk()
-            ->assertJson(fn (AssertableJson $json) => $json
+            ->assertJson(fn(AssertableJson $json) => $json
                 ->where('message', 'Guide for the day retrieved successfully')
                 ->etc()
                 ->has('data', $amountOfAirings)
@@ -160,7 +160,7 @@ class GuideControllerTest extends TestCase
         $this->travelTo(now()->setTime(10, 0));
 
         $this->makeAirings(10)->map(
-            fn (BroadcastAiring $airing) => $channel->addBroadcast($airing)
+            fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
         );
 
         // Travel back in order to have all those broadcasts as upcoming ones
@@ -169,6 +169,6 @@ class GuideControllerTest extends TestCase
         $this
             ->getJson(route('upcoming-broadcasts', ['channel' => $channel->number]))
             ->assertOk()
-            ->assertJson(fn (AssertableJson $json) => $json->has('data', 10)->etc());
+            ->assertJson(fn(AssertableJson $json) => $json->has('data', 10)->etc());
     }
 }

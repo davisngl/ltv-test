@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Contracts\BroadcastAiringInterface;
 use App\DTO\BroadcastAiring;
 use App\Exceptions\DateFilterException;
 use App\Http\Requests\ComposeGuideRequest;
 use App\Http\Resources\BroadcastResource;
 use App\Http\Resources\BroadcastResourceCollection;
-use App\Models\Broadcast;
 use App\Models\Channel;
+use App\Services\Guide;
 use Carbon\CarbonImmutable;
-use Carbon\CarbonPeriod;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\Response;
+use Spatie\Period\Period;
 
 class GuideController extends Controller
 {
@@ -30,33 +29,9 @@ class GuideController extends Controller
             throw DateFilterException::incorrectDateFormatSupplied();
         }
 
-        $airings = $channel
-            ->airingsOn($date)
-            ->values();
-
-        $airings
-            ->map(static function (Broadcast $broadcast, int $order) use (&$airings) {
-                /**
-                 * As 'values' method makes the array indexed by integer key,
-                 * it is easy to access next item - no need for linked list
-                 * or options that Iterable gives.
-                 */
-                $nextBroadcast = $airings->get($order + 1);
-
-                if (! $nextBroadcast) {
-                    /**
-                     * Since it's the last airing of the daily program,
-                     * there is no end date fix-up.
-                     */
-                    return $broadcast->toArray();
-                }
-
-                $broadcast->airing->ends_at = $nextBroadcast->airing->starts_at;
-
-                return $broadcast->toArray();
-            });
-
-        return BroadcastResourceCollection::make($airings);
+        return BroadcastResourceCollection::make(
+            (new Guide($channel->airingsOn($date)->values()))->compile()
+        );
     }
 
     /**
@@ -67,10 +42,7 @@ class GuideController extends Controller
     {
         $airing = new BroadcastAiring(
             broadcastName: $request->input('broadcast_name'),
-            datetime: new CarbonPeriod(
-                $request->input('starts_at'),
-                $request->input('ends_at')
-            )
+            datetime: Period::make(start: $request->input('starts_at'), end: $request->input('ends_at'))
         );
 
         $request

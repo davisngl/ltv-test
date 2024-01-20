@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Contracts\BroadcastAiringInterface;
+use App\Services\Guide;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -61,11 +63,16 @@ class Channel extends Model
      */
     public function currentlyAiring(): ?Broadcast
     {
-        return $this
-            ->broadcasts()
-            ->wherePivot('starts_at', '>=', now())
-            ->wherePivot('ends_at', '>', now())
-            ->first();
+        $airings = $this
+            ->airingsOn($now = now()->toImmutable())
+            ->values();
+
+        return (new Guide($airings))
+            ->compile()
+            ->first(static function (Broadcast $broadcast) use ($now) {
+                return Carbon::parse($broadcast->airing->starts_at)->lt($now)
+                    && Carbon::parse($broadcast->airing->ends_at)->gt($now);
+            });
     }
 
     /**
@@ -107,8 +114,8 @@ class Channel extends Model
         $this->broadcasts()->attach(
             $broadcast,
             [
-                'starts_at' => $airing->getAiringDatetime()->getStartDate(),
-                'ends_at'   => $airing->getAiringDatetime()->getEndDate(),
+                'starts_at' => $airing->getAiringDatetime()->start(),
+                'ends_at'   => $airing->getAiringDatetime()->end(),
             ]
         );
 
