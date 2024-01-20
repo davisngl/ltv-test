@@ -4,8 +4,8 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Fluent;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -31,12 +31,16 @@ class Handler extends ExceptionHandler
         });
 
         $this->renderable(function (Throwable $e) {
-           if ($e instanceof NotFoundHttpException) {
-               return response()->failure(
-                   message: 'Record has not been found',
-                   status: 404
-               );
-           }
+            if (app()->runningUnitTests() || ! request()->wantsJson()) {
+                // In tests, some assertions require the "original" structure of certain exceptions,
+                // therefore, we only would overwrite the structure during normal operation.
+                return;
+            }
+
+            return response()->failure(
+                message: $e->getMessage(),
+                status: (new Fluent($e))->status ?: 404 // fail-safe checking if 'status' property is set or not
+            );
         });
     }
 

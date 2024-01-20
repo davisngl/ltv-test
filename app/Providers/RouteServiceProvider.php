@@ -25,7 +25,11 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return [
+                // [README] Ideally, I'd have these "max attempts" configurable.
+                Limit::perMinute(20)->by($request->ip()),
+                Limit::perMinute(20)->by($request->bearerToken())
+            ];
         });
 
         $this->routes(function () {
