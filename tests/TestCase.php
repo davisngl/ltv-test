@@ -14,7 +14,7 @@ abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
 
-    protected function authenticate(User $user = null): void
+    protected function authenticate(?User $user = null): void
     {
         Sanctum::actingAs($user ?? User::factory()->create());
     }

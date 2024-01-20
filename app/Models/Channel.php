@@ -31,7 +31,7 @@ class Channel extends Model
             ->as('airing');
     }
 
-    public function airingsOn(CarbonImmutable $date): BelongsToMany
+    public function airingsOn(CarbonImmutable $date): Collection
     {
         $fromDatetime = $date->setTime(hour: 6, minute: 0);
         $endDatetime = $fromDatetime->addDay();
@@ -44,7 +44,8 @@ class Channel extends Model
              */
             ->wherePivot('starts_at', '>=', $fromDatetime)
             ->wherePivot('ends_at', '<', $endDatetime)
-            ->orderByPivot('starts_at');
+            ->orderByPivot('starts_at')
+            ->get();
     }
 
     public function currentlyAiring(): ?Broadcast

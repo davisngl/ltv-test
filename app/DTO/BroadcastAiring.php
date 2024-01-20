@@ -10,7 +10,8 @@ readonly class BroadcastAiring implements BroadcastAiringInterface
     public function __construct(
         protected string $broadcastName,
         protected CarbonPeriod $datetime
-    ) {}
+    ) {
+    }
 
     public function getBroadcastName(): string
     {

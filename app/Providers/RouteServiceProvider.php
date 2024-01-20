@@ -28,7 +28,7 @@ class RouteServiceProvider extends ServiceProvider
             return [
                 // [README] Ideally, I'd have these "max attempts" configurable.
                 Limit::perMinute(20)->by($request->ip()),
-                Limit::perMinute(20)->by($request->bearerToken())
+                Limit::perMinute(20)->by($request->bearerToken()),
             ];
         });
 

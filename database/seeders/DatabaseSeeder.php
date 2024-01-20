@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
 
         $dummyBroadcasts = File::json(database_path('seeders/guide/broadcasts.json'));
 
-        collect($dummyBroadcasts)->each(fn(array $broadcast) => Broadcast::firstOrCreate(['name' => $broadcast['name']])
+        collect($dummyBroadcasts)->each(fn (array $broadcast) => Broadcast::firstOrCreate(['name' => $broadcast['name']])
         );
 
         $this->command->info(

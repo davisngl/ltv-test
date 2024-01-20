@@ -26,7 +26,6 @@ class GuideController extends Controller
 
         $airings = $channel
             ->airingsOn($date)
-            ->get()
             ->values();
 
         $airings
