@@ -14,6 +14,8 @@ class BroadcastResource extends JsonResource
         return [
             'broadcast_id' => $this->id,
             'name'         => $this->name,
+            'starts_at'    => $this->airing->starts_at,
+            'ends_at'      => $this->airing->ends_at,
         ];
     }
 }
