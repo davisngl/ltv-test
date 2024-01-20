@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\BroadcastAiringInterface;
 use App\DTO\BroadcastAiring;
 use App\Exceptions\DateFilterException;
 use App\Http\Requests\ComposeGuideRequest;
