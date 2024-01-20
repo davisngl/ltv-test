@@ -37,9 +37,11 @@ class Handler extends ExceptionHandler
                 return;
             }
 
+//            ray((new Fluent($e))->status, $e);
+
             return response()->failure(
                 message: $e->getMessage(),
-                status: (new Fluent($e))->status ?: 404 // fail-safe checking if 'status' property is set or not
+                status: (new Fluent($e))->status ?? 404 // fail-safe checking if 'status' property is set or not
             );
         });
     }
