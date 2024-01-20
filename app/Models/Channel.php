@@ -31,6 +31,12 @@ class Channel extends Model
             ->as('airing');
     }
 
+    /**
+     * Get full TV program airings (from 06:00:00 to next day 05:59:59).
+     *
+     * @param CarbonImmutable $date
+     * @return Collection
+     */
     public function airingsOn(CarbonImmutable $date): Collection
     {
         $fromDatetime = $date->setTime(hour: 6, minute: 0);
@@ -48,6 +54,11 @@ class Channel extends Model
             ->get();
     }
 
+    /**
+     * Get broadcast that is currently on-air according to current time.
+     *
+     * @return Broadcast|null
+     */
     public function currentlyAiring(): ?Broadcast
     {
         return $this
@@ -57,6 +68,12 @@ class Channel extends Model
             ->first();
     }
 
+    /**
+     * Get upcoming broadcasts for current channel.
+     *
+     * @param int $amount Amount of upcoming broadcasts to pick
+     * @return Collection Collection of ordered broadcasts
+     */
     public function upcomingBroadcasts(int $amount = 10): Collection
     {
         return $this
@@ -79,6 +96,10 @@ class Channel extends Model
             ->get();
     }
 
+    /**
+     * @param BroadcastAiringInterface $airing Payload for broadcast airing data
+     * @return Broadcast The broadcast that was just created
+     */
     public function addBroadcast(BroadcastAiringInterface $airing): Broadcast
     {
         $broadcast = Broadcast::firstOrCreate(['name' => $airing->getBroadcastName()]);

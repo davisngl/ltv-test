@@ -16,6 +16,11 @@ use Illuminate\Http\Response;
 
 class GuideController extends Controller
 {
+    /**
+     * @param Channel $channel
+     * @param string $date
+     * @return BroadcastResourceCollection
+     */
     public function guideForDay(Channel $channel, string $date)
     {
         try {
@@ -29,10 +34,19 @@ class GuideController extends Controller
             ->values();
 
         $airings
-            ->map(function (Broadcast $broadcast, int $order) use (&$airings) {
+            ->map(static function (Broadcast $broadcast, int $order) use (&$airings) {
+                /**
+                 * As 'values' method makes the array indexed by integer key,
+                 * it is easy to access next item - no need for linked list
+                 * or options that Iterable gives.
+                 */
                 $nextBroadcast = $airings->get($order + 1);
 
                 if (! $nextBroadcast) {
+                    /**
+                     * Since it's the last airing of the daily program,
+                     * there is no end date fix-up.
+                     */
                     return $broadcast->toArray();
                 }
 
@@ -44,6 +58,10 @@ class GuideController extends Controller
         return BroadcastResourceCollection::make($airings);
     }
 
+    /**
+     * @param ComposeGuideRequest $request
+     * @return mixed
+     */
     public function composeGuide(ComposeGuideRequest $request)
     {
         $airing = new BroadcastAiring(
@@ -64,6 +82,10 @@ class GuideController extends Controller
         );
     }
 
+    /**
+     * @param Channel $channel
+     * @return mixed
+     */
     public function currentBroadcast(Channel $channel)
     {
         $currentlyOnAir = $channel->currentlyAiring();
@@ -71,16 +93,26 @@ class GuideController extends Controller
         if (! $currentlyOnAir) {
             return response()->failure(
                 message: 'Nothing on air currently. Is the TV guide set for the day?',
-                status: 404
+                status: Response::HTTP_NOT_FOUND
             );
         }
 
+        /**
+         * There are some issues wrapping singular model resource
+         * as equivalent '<singular resource>Collection' would automagically
+         * pick up singular model resource as a wrapper for collection items.
+         * Potentially, some package already elegantly fixes this issue with good DX.
+         */
         return response()->success(
             message: 'Current broadcast retrieved successfully',
             data: BroadcastResource::make($currentlyOnAir)
         );
     }
 
+    /**
+     * @param Channel $channel
+     * @return BroadcastResourceCollection
+     */
     public function upcomingBroadcasts(Channel $channel)
     {
         return BroadcastResourceCollection::make($channel->upcomingBroadcasts());
