@@ -12,8 +12,8 @@ class BroadcastTest extends TestCase
     use LazilyRefreshDatabase;
 
     /** @test */
-	public function it_successfully_retrieves_associated_broadcasts_across_channels()
-	{
+    public function it_successfully_retrieves_associated_broadcasts_across_channels()
+    {
         $channel = Channel::factory()->create();
         $broadcast = Broadcast::factory()->create();
 
@@ -30,5 +30,5 @@ class BroadcastTest extends TestCase
         $this->assertInstanceOf(Channel::class, $airing);
         $this->assertEquals($startsAt, $airing->airing->starts_at);
         $this->assertEquals($endsAt, $airing->airing->ends_at);
-	}
+    }
 }

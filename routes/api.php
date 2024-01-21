@@ -1,19 +1,17 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\GuideController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::middleware('auth:sanctum')
+    ->controller(GuideController::class)
+    ->group(function () {
+        Route::get('guide/{channel:number}/{date}', 'guideForDay')
+            ->name('guide-for-day');
+        Route::get('on-air/{channel:number}', 'currentBroadcast')
+            ->name('on-air');
+        Route::get('upcoming/{channel:number}', 'upcomingBroadcasts')
+            ->name('upcoming-broadcasts');
+        Route::post('compose-guide', 'composeGuide')
+            ->name('compose-guide');
+    });

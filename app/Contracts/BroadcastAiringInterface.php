@@ -2,14 +2,14 @@
 
 namespace App\Contracts;
 
-use Carbon\CarbonPeriod;
+use Spatie\Period\Period;
 
 interface BroadcastAiringInterface
 {
     public function getBroadcastName(): string;
 
     /**
-     * @return CarbonPeriod|null Broadcasts' start time and end time if it's given
+     * @return Period Broadcasts' start time and end time if it's given
      */
-    public function getAiringDatetime(): ?CarbonPeriod;
+    public function getAiringDatetime(): Period;
 }

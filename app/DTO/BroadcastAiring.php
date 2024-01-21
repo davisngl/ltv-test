@@ -3,21 +3,22 @@
 namespace App\DTO;
 
 use App\Contracts\BroadcastAiringInterface;
-use Carbon\CarbonPeriod;
+use Spatie\Period\Period;
 
 readonly class BroadcastAiring implements BroadcastAiringInterface
 {
     public function __construct(
         protected string $broadcastName,
-        protected CarbonPeriod $datetime
-    ) {}
+        protected Period $datetime
+    ) {
+    }
 
     public function getBroadcastName(): string
     {
         return $this->broadcastName;
     }
 
-    public function getAiringDatetime(): ?CarbonPeriod
+    public function getAiringDatetime(): Period
     {
         return $this->datetime;
     }

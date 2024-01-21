@@ -3,6 +3,9 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Fluent;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +29,32 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        $this->renderable(function (Throwable $e) {
+            if (app()->runningUnitTests()) {
+                // In tests, some assertions require the "original" structure of certain exceptions,
+                // therefore, we only would overwrite the structure during normal operation.
+                return;
+            }
+
+            return response()->failure(
+                message: $e->getMessage(),
+                status: (new Fluent($e))->status ?? 404 // fail-safe checking if 'status' property is set or not
+            );
+        });
+    }
+
+    protected function invalidJson($request, ValidationException $exception): JsonResponse
+    {
+        if (app()->runningUnitTests()) {
+            return parent::invalidJson($request, $exception);
+        }
+
+        return response()->failure(
+            message: $exception->getMessage(),
+            data: count($exception->errors())
+                ? $exception->errors()
+                : null,
+            status: $exception->status);
     }
 }
