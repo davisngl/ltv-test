@@ -13,8 +13,6 @@ readonly class Guide
 
     /**
      * Create a collection of broadcast airings for the day.
-     *
-     * @return Collection
      */
     public function compile(): Collection
     {

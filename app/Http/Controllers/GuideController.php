@@ -19,8 +19,6 @@ use Spatie\Period\Precision;
 class GuideController extends Controller
 {
     /**
-     * @param Channel $channel
-     * @param string $date
      * @return BroadcastResourceCollection
      */
     public function guideForDay(Channel $channel, string $date)
@@ -37,7 +35,6 @@ class GuideController extends Controller
     }
 
     /**
-     * @param ComposeGuideRequest $request
      * @return mixed
      */
     public function composeGuide(ComposeGuideRequest $request)
@@ -67,7 +64,6 @@ class GuideController extends Controller
     }
 
     /**
-     * @param Channel $channel
      * @return mixed
      */
     public function currentBroadcast(Channel $channel)
@@ -94,7 +90,6 @@ class GuideController extends Controller
     }
 
     /**
-     * @param Channel $channel
      * @return BroadcastResourceCollection
      */
     public function upcomingBroadcasts(Channel $channel)

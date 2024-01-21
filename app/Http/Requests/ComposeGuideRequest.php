@@ -20,7 +20,7 @@ class ComposeGuideRequest extends FormRequest
                 'required',
                 'date',
                 'date_format:Y-m-d H:i:s',
-                new PeriodHasNoOverlap(existingAirings: $this->getChannel()->airingsOn($this->input('starts_at')))
+                new PeriodHasNoOverlap(existingAirings: $this->getChannel()->airingsOn($this->input('starts_at'))),
             ],
         ];
     }

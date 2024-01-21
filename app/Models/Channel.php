@@ -36,9 +36,6 @@ class Channel extends Model
 
     /**
      * Get full TV program airings (from 06:00:00 to next day 05:59:59).
-     *
-     * @param string $date
-     * @return Collection
      */
     public function airingsOn(string $date): Collection
     {
@@ -67,8 +64,6 @@ class Channel extends Model
 
     /**
      * Get broadcast that is currently on-air according to current time.
-     *
-     * @return Broadcast|null
      */
     public function currentlyAiring(): ?Broadcast
     {
@@ -86,7 +81,7 @@ class Channel extends Model
     /**
      * Get upcoming broadcasts for current channel.
      *
-     * @param int $amount Amount of upcoming broadcasts to pick
+     * @param  int  $amount  Amount of upcoming broadcasts to pick
      * @return Collection Collection of ordered broadcasts
      */
     public function upcomingBroadcasts(int $amount = 10): Collection
@@ -111,7 +106,7 @@ class Channel extends Model
     }
 
     /**
-     * @param BroadcastAiringInterface $airing Payload for broadcast airing data
+     * @param  BroadcastAiringInterface  $airing  Payload for broadcast airing data
      * @return Broadcast The broadcast that was just created
      */
     public function addBroadcast(BroadcastAiringInterface $airing): Broadcast

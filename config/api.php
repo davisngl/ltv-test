@@ -9,13 +9,13 @@ return [
      */
     'rate_limiting' => [
         // Based on IPv4
-        'ipv4'      => [
+        'ipv4' => [
             'max_attempts' => 20,
         ],
 
         // Based on Bearer token
         'api_token' => [
             'max_attempts' => 20,
-        ]
+        ],
     ],
 ];

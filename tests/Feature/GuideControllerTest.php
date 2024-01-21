@@ -44,7 +44,7 @@ class GuideControllerTest extends TestCase
         $this
             ->withoutExceptionHandling()
             ->assertThrows(
-                fn() => $this->getJson(route('guide-for-day', ['channel' => $channel, 'date' => ':invalid:'])),
+                fn () => $this->getJson(route('guide-for-day', ['channel' => $channel, 'date' => ':invalid:'])),
                 DateFilterException::class
             );
     }
@@ -55,7 +55,7 @@ class GuideControllerTest extends TestCase
         $channel = Channel::factory()->create();
 
         $this->makeAirings($amountOfAirings = 10)->map(
-            static fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
+            static fn (BroadcastAiring $airing) => $channel->addBroadcast($airing)
         );
 
         $this
@@ -66,7 +66,7 @@ class GuideControllerTest extends TestCase
                 )
             )
             ->assertOk()
-            ->assertJson(static fn(AssertableJson $json) => $json
+            ->assertJson(static fn (AssertableJson $json) => $json
                 ->where('message', 'Guide for the day retrieved successfully')
                 ->has('data', $amountOfAirings)
                 ->etc()
@@ -82,7 +82,7 @@ class GuideControllerTest extends TestCase
      *
      * @dataProvider invalidDataProvider
      */
-    public function it_fails_validation_when_providing_invalid_data_for_adding_airings(array $payload, array $keys, callable $setup = null)
+    public function it_fails_validation_when_providing_invalid_data_for_adding_airings(array $payload, array $keys, ?callable $setup = null)
     {
         Channel::factory()->create(['number' => 1]);
 
@@ -107,7 +107,7 @@ class GuideControllerTest extends TestCase
         ];
 
         yield from [
-            'broadcast_name too long'                  => [
+            'broadcast_name too long' => [
                 'payload' => array_merge($payload, ['broadcast_name' => str('s')->repeat(101)]),
                 'keys'    => ['broadcast_name'],
             ],
@@ -115,7 +115,7 @@ class GuideControllerTest extends TestCase
                 'payload' => array_merge($payload, ['ends_at' => $payload['starts_at']->subDay()]),
                 'keys'    => ['starts_at'],
             ],
-            'airing at given time already exists'      => [
+            'airing at given time already exists' => [
                 'payload' => $payload,
                 'keys'    => ['ends_at'],
                 'setup'   => static function () use ($payload) {
@@ -156,7 +156,7 @@ class GuideControllerTest extends TestCase
         $this->travelTo(now()->setTime(10, 0));
 
         $this->makeAirings(10)->map(
-            static fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
+            static fn (BroadcastAiring $airing) => $channel->addBroadcast($airing)
         );
 
         // Travel back in order to have all those broadcasts as upcoming ones
@@ -165,6 +165,6 @@ class GuideControllerTest extends TestCase
         $this
             ->getJson(route('upcoming-broadcasts', ['channel' => $channel->number]))
             ->assertOk()
-            ->assertJson(static fn(AssertableJson $json) => $json->has('data', 10)->etc());
+            ->assertJson(static fn (AssertableJson $json) => $json->has('data', 10)->etc());
     }
 }

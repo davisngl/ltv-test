@@ -11,20 +11,19 @@ use Spatie\Period\Boundaries;
 use Spatie\Period\Period;
 use Spatie\Period\Precision;
 
-class PeriodHasNoOverlap implements ValidationRule, DataAwareRule
+class PeriodHasNoOverlap implements DataAwareRule, ValidationRule
 {
     protected array $data = [];
 
     public function __construct(
         private readonly Collection $existingAirings,
-    )
-    {
+    ) {
     }
 
     /**
      * Run the validation rule.
      *
-     * @param \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString $fail
+     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -65,7 +64,8 @@ class PeriodHasNoOverlap implements ValidationRule, DataAwareRule
         }
     }
 
-    #[\Override] public function setData(array $data): static
+    #[\Override]
+    public function setData(array $data): static
     {
         $this->data = $data;
 
