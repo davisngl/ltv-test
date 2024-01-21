@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\BroadcastAiringInterface;
-use App\Services\Guide;
+use App\Services\CompilableGuideInterface;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
@@ -70,7 +70,7 @@ class Channel extends Model
         $airings = $this
             ->airingsOn($now = now()->toImmutable());
 
-        return (new Guide($airings))
+        return app(CompilableGuideInterface::class, [$airings])
             ->compile()
             ->first(static function (Broadcast $broadcast) use ($now) {
                 return Carbon::parse($broadcast->airing->starts_at)->lt($now)

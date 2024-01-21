@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Broadcast;
 use Illuminate\Support\Collection;
 
-readonly class Guide
+readonly class Guide implements CompilableGuideInterface
 {
     public function __construct(private Collection $airings)
     {
