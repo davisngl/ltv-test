@@ -9,10 +9,12 @@ use App\Http\Resources\BroadcastResource;
 use App\Http\Resources\BroadcastResourceCollection;
 use App\Models\Channel;
 use App\Services\Guide;
-use Carbon\CarbonImmutable;
+use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\Response;
+use Spatie\Period\Boundaries;
 use Spatie\Period\Period;
+use Spatie\Period\Precision;
 
 class GuideController extends Controller
 {
@@ -24,14 +26,14 @@ class GuideController extends Controller
     public function guideForDay(Channel $channel, string $date)
     {
         try {
-            $date = CarbonImmutable::createFromFormat('Y-m-d', $date);
+            $date = Carbon::createFromFormat('Y-m-d', $date)->setTimeFrom(now());
         } catch (InvalidFormatException) {
             throw DateFilterException::incorrectDateFormatSupplied();
         }
 
-        return BroadcastResourceCollection::make(
-            (new Guide($channel->airingsOn($date)->values()))->compile()
-        );
+        $guide = (new Guide($channel->airingsOn($date)))->compile();
+
+        return BroadcastResourceCollection::make($guide);
     }
 
     /**
@@ -42,12 +44,21 @@ class GuideController extends Controller
     {
         $airing = new BroadcastAiring(
             broadcastName: $request->input('broadcast_name'),
-            datetime: Period::make(start: $request->input('starts_at'), end: $request->input('ends_at'))
+            datetime: Period::make(
+                start: $request->input('starts_at'),
+                end: $request->input('ends_at'),
+                precision: Precision::SECOND(),
+                boundaries: Boundaries::EXCLUDE_ALL()
+            )
         );
 
-        $request
-            ->getChannel()
-            ->addBroadcast($airing);
+        try {
+            $request
+                ->getChannel()
+                ->addBroadcast($airing);
+        } catch (InvalidFormatException $e) {
+            return response()->failure(message: $e->getMessage());
+        }
 
         return response()->success(
             message: 'Broadcast airing added successfully',

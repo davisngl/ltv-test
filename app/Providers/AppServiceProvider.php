@@ -37,7 +37,6 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Response::macro('failure', function (string $message = 'Failure', mixed $data = [], int $status = ResponseCode::HTTP_UNPROCESSABLE_ENTITY) {
-            // TODO Create reusable DTO that can be passed here, as it's kinda needed in API resources as well.
             return Response::json([
                 'success' => false,
                 'message' => $message,

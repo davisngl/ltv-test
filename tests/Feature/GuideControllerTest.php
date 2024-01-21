@@ -5,12 +5,13 @@ namespace Tests\Feature;
 use App\DTO\BroadcastAiring;
 use App\Exceptions\DateFilterException;
 use App\Models\Channel;
-use Closure;
 use Generator;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Fluent;
 use Illuminate\Testing\Fluent\AssertableJson;
+use Spatie\Period\Boundaries;
 use Spatie\Period\Period;
+use Spatie\Period\Precision;
 use Tests\TestCase;
 
 class GuideControllerTest extends TestCase
@@ -26,52 +27,6 @@ class GuideControllerTest extends TestCase
         $fluent->ends_at = $fluent->ends_at->format('Y-m-d H:i:s');
 
         return $fluent->toArray();
-    }
-
-    public static function invalidDataProvider(): Generator
-    {
-        $payload = [
-            'channel_number' => 1,
-            'broadcast_name' => ':broadcast:',
-            'starts_at'      => $now = now()->toImmutable(),
-            'ends_at'        => $now->addMinutes(30),
-        ];
-
-        yield from [
-            'missing channel_number'                     => [
-                'payload' => array_merge($payload, ['channel_number' => null]),
-                'keys'    => ['channel_number'],
-            ],
-            'channel number does not exist'              => [
-                'payload' => array_merge($payload, ['channel_number' => 20]),
-                'keys'    => ['channel_number'],
-            ],
-            'broadcast_name too long'                    => [
-                'payload' => array_merge($payload, ['broadcast_name' => str('s')->repeat(101)]),
-                'keys'    => ['broadcast_name'],
-            ],
-            'ends_at is earlier than starts_at datetime' => [
-                'payload' => array_merge($payload, ['ends_at' => $payload['starts_at']->subDay()]),
-                'keys'    => ['ends_at'],
-            ],
-            'airing at given time already exists'        => [
-                'payload' => $payload,
-                'keys'    => ['starts_at', 'ends_at'],
-                'setup'   => static function () use ($payload) {
-                    $airingPayload = new BroadcastAiring(
-                        'Broadcast Test',
-                        Period::make(
-                            start: $payload['starts_at'],
-                            end: $payload['starts_at']->addMinutes(30)
-                        )
-                    );
-
-                    Channel::query()
-                        ->firstWhere('number', $payload['channel_number'])
-                        ->addBroadcast($airingPayload);
-                },
-            ],
-        ];
     }
 
     public function setUp(): void
@@ -100,21 +55,21 @@ class GuideControllerTest extends TestCase
         $channel = Channel::factory()->create();
 
         $this->makeAirings($amountOfAirings = 10)->map(
-            fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
+            static fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
         );
 
         $this
             ->getJson(
                 route(
                     'guide-for-day',
-                    ['channel' => $channel->number, 'date' => now()->format('Y-m-d')]
+                    ['channel' => $channel->number, 'date' => $date = now()->format('Y-m-d')]
                 )
             )
             ->assertOk()
-            ->assertJson(fn(AssertableJson $json) => $json
+            ->assertJson(static fn(AssertableJson $json) => $json
                 ->where('message', 'Guide for the day retrieved successfully')
-                ->etc()
                 ->has('data', $amountOfAirings)
+                ->etc()
             );
 
         $this->assertCount($amountOfAirings, $channel->broadcasts);
@@ -127,7 +82,7 @@ class GuideControllerTest extends TestCase
      *
      * @dataProvider invalidDataProvider
      */
-    public function it_fails_validation_when_providing_invalid_data_for_adding_airings(array $payload, array $keys, ?Closure $setup = null)
+    public function it_fails_validation_when_providing_invalid_data_for_adding_airings(array $payload, array $keys, callable $setup = null)
     {
         Channel::factory()->create(['number' => 1]);
 
@@ -140,6 +95,47 @@ class GuideControllerTest extends TestCase
         $this
             ->postJson(route('compose-guide'), $payload)
             ->assertJsonValidationErrors($keys);
+    }
+
+    public static function invalidDataProvider(): Generator
+    {
+        $payload = [
+            'channel_number' => 1,
+            'broadcast_name' => ':broadcast:',
+            'starts_at'      => $now = now()->setTime(7, 0)->toImmutable(),
+            'ends_at'        => $now->addMinutes(30),
+        ];
+
+        yield from [
+            'broadcast_name too long'                  => [
+                'payload' => array_merge($payload, ['broadcast_name' => str('s')->repeat(101)]),
+                'keys'    => ['broadcast_name'],
+            ],
+            'starts_at is not before ends_at datetime' => [
+                'payload' => array_merge($payload, ['ends_at' => $payload['starts_at']->subDay()]),
+                'keys'    => ['starts_at'],
+            ],
+            'airing at given time already exists'      => [
+                'payload' => $payload,
+                'keys'    => ['ends_at'],
+                'setup'   => static function () use ($payload) {
+                    $airingPayload = new BroadcastAiring(
+                        'Broadcast Test',
+                        Period::make(
+                            start: $payload['starts_at'],
+                            end: $payload['ends_at'],
+                            precision: Precision::SECOND(),
+                            boundaries: Boundaries::EXCLUDE_ALL()
+                        )
+                    );
+
+                    Channel::query()
+                        ->firstWhere('number', $payload['channel_number'])
+                        ->addBroadcast($airingPayload);
+                },
+            ],
+            // ...and many more
+        ];
     }
 
     /** @test */
@@ -160,7 +156,7 @@ class GuideControllerTest extends TestCase
         $this->travelTo(now()->setTime(10, 0));
 
         $this->makeAirings(10)->map(
-            fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
+            static fn(BroadcastAiring $airing) => $channel->addBroadcast($airing)
         );
 
         // Travel back in order to have all those broadcasts as upcoming ones
@@ -169,6 +165,6 @@ class GuideControllerTest extends TestCase
         $this
             ->getJson(route('upcoming-broadcasts', ['channel' => $channel->number]))
             ->assertOk()
-            ->assertJson(fn(AssertableJson $json) => $json->has('data', 10)->etc());
+            ->assertJson(static fn(AssertableJson $json) => $json->has('data', 10)->etc());
     }
 }

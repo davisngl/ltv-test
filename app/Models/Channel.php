@@ -30,19 +30,28 @@ class Channel extends Model
         return $this
             ->belongsToMany(Broadcast::class)
             ->withPivot(['starts_at', 'ends_at'])
+            ->orderByPivot('starts_at')
             ->as('airing');
     }
 
     /**
      * Get full TV program airings (from 06:00:00 to next day 05:59:59).
      *
-     * @param CarbonImmutable $date
+     * @param string $date
      * @return Collection
      */
-    public function airingsOn(CarbonImmutable $date): Collection
+    public function airingsOn(string $date): Collection
     {
-        $fromDatetime = $date->setTime(hour: 6, minute: 0);
-        $endDatetime = $fromDatetime->addDay();
+        $date = CarbonImmutable::parse($date);
+
+        /**
+         * When current daily program is being queried, it uses current time.
+         * If this time is after midnight, we have to take into account the
+         * 6:00:00 boundary which indicates previous or next day schedule.
+         */
+        if ($date->isBetween($date->setTime(0, 0), $date->setTime(6, 0))) {
+            $date = $date->subDay();
+        }
 
         return $this
             ->broadcasts()
@@ -50,10 +59,10 @@ class Channel extends Model
              * Date filtering works with inclusive 'from' and exclusive 'end' dates,
              * as 06:00:00 already denotes next days' TV program.
              */
-            ->wherePivot('starts_at', '>=', $fromDatetime)
-            ->wherePivot('ends_at', '<', $endDatetime)
-            ->orderByPivot('starts_at')
-            ->get();
+            ->wherePivot('starts_at', '>=', $date->setTime(6, 0))
+            ->wherePivot('ends_at', '<', $date->setTime(6, 0)->addDay())
+            ->get()
+            ->values();
     }
 
     /**
@@ -64,8 +73,7 @@ class Channel extends Model
     public function currentlyAiring(): ?Broadcast
     {
         $airings = $this
-            ->airingsOn($now = now()->toImmutable())
-            ->values();
+            ->airingsOn($now = now()->toImmutable());
 
         return (new Guide($airings))
             ->compile()
@@ -98,7 +106,6 @@ class Channel extends Model
              */
             ->wherePivot('starts_at', '<', now()->toImmutable()->setTime(6, 0)->addDay())
             ->wherePivot('starts_at', '>', now())
-            ->orderByPivot('starts_at')
             ->limit($amount)
             ->get();
     }
