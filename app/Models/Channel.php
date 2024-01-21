@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\BroadcastAiringInterface;
-use App\Services\CompilableGuideInterface;
+use App\Contracts\CompilableGuideInterface;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;

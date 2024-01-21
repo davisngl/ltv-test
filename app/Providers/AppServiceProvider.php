@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Services\CompilableGuideInterface;
+use App\Contracts\CompilableGuideInterface;
 use App\Services\Guide;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response as ResponseCode;

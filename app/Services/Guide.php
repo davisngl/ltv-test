@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\CompilableGuideInterface;
 use App\Models\Broadcast;
 use Illuminate\Support\Collection;
 
