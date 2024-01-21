@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\CompilableGuideInterface;
 use App\DTO\BroadcastAiring;
 use App\Exceptions\DateFilterException;
 use App\Http\Requests\ComposeGuideRequest;
 use App\Http\Resources\BroadcastResource;
 use App\Http\Resources\BroadcastResourceCollection;
 use App\Models\Channel;
-use App\Services\Guide;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Http\Response;
@@ -29,7 +29,10 @@ class GuideController extends Controller
             throw DateFilterException::incorrectDateFormatSupplied();
         }
 
-        $guide = (new Guide($channel->airingsOn($date)))->compile();
+        $guide = app(
+            CompilableGuideInterface::class,
+            [$channel->airingsOn($date)]
+        )->compile();
 
         return BroadcastResourceCollection::make($guide);
     }

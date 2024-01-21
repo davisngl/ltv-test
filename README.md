@@ -1,66 +1,38 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Introduction
+TV Guide API for getting daily broadcast, current broadcast on-air and what's coming next in context of airings.
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Setup
+Project uses the minimum version of **PHP 8.3**.
+It is optimized for usage with **Laravel Sail** with all the needed services.
 
-## About Laravel
+1. Clone the repository locally and go to the root of that directory
+2. `cp .env.example .env`
+3. Turn off locally running MySQL, Redis and Nginx (if applicable) as port interfering will happen when running Sail
+4. `./vendor/bin/sail up -d` - this will take some time while images are pulled down and services are spun up
+5. `./vendor/bin/sail artisan migrate --seed` to run your migrations and to seed the initial data
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**NB:** This will provide you with initial 3 initial channels and Sanctum API token in the console output.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## API
+API is protected using Sanctum API tokens (should be provided as `Bearer` tokens in your chosen API client).  
+**Postman**-compatible API request collection was provided beforehand.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Rate limiting
+Max 20 requests / minute, limited by used IP address and API token.
+If needed, request amount is configurable in `config/api.php`.
 
-## Learning Laravel
+### Additional / new API tokens
+You can run `./vendor/bin/sail tinker`. Once it opens, run `User::first()->createToken('call it whatever');` and it will output `plainTextToken` - that you can use for your `Bearer` token from now on.  
+Tokens have no expiration.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Testing
+You can run the test suite using `./vendor/bin/sail test`.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Quality tooling
+In `composer.json` you will have 2 scripts - `fix-styles` (fix code style according to LaraveL Pint) and `ide-helper` (generate model metadata for better IDE autocomplete support).
+You can run those scripts like so `./vendor/bin/sail composer run <script>` or just `./vendor/bin/sail composer <script>`.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# What could've been done but out of time
+1. Static analysis
+2. A lot more of tests. Mostly tested the happy paths, but there can be a lot more validation bugs, edge cases, datetime boundary and mutability bugs etc. This is mostly shown that I know testing.
+3. DTOs could've been bound to an interface for easier runtime swaps for testing or normal use, but not sure if I should put everything under the Sun on interface in order to be able to swap it out.

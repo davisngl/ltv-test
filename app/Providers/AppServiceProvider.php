@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\CompilableGuideInterface;
+use App\Services\Guide;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response as ResponseCode;
 use Illuminate\Support\Facades\Response;
@@ -14,7 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(CompilableGuideInterface::class, Guide::class);
     }
 
     /**
